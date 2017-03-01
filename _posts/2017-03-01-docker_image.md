@@ -115,6 +115,6 @@ docker load -i nginxplus.tar
 
 [official-images](https://github.com/docker-library/official-images)
 
-## 
+## 其他
 
-自动构建镜像，提交到git
+提交Dockerfile到git，利用hooks自动构建镜像
