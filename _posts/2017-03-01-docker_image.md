@@ -37,9 +37,10 @@
 * 避免在Dockerfile中映射共用端口
 * CMD/ENTRYPOINT命令使用数组语法
 * 使用.dockerignore避免上传不需要的文件到镜像中
-* 由于layer最大只有127层，所以可在行末使用\来合并ENV和RUN，减少layer的层数
-* 但是RUN合并过多会造成镜像生成变慢，主要是无法复用层，故需要频繁生成镜像时，RUN可以不做合并
-* 同理，需要在dockerfile中将不会变动的命令放置到前面执行，时常变动的放到后面执行
+* 通过在行末使用\来合并ENV和RUN，减少layer的层数，避免layer超过127层
+* RUN合并过多会造成镜像生成变慢，还会造成无法复用层
+* 需要频繁生成镜像时，RUN可以不做合并
+* 在dockerfile中将不会变动的命令放置到前面执行，时常变动的放到后面执行
 * docker命令不区分大小写，但为了区别指令和指令参数，以及改善可读性，建议使用大写
 * [gosu](https://github.com/tianon/gosu)
 * 建议每个容器仅运行一个服务
@@ -52,12 +53,12 @@
 * 合理使用ONBUILD
 * 最后确保/var/lock/下没有遗留的文件
 * 清理包管理的缓存/.git等文件
+* MAINTAINER 指令已被废弃，可以用 LABEL maintainer=<...> 代替
+* 避免使用COPY/ADD，如果必须使用，请写明具体的命令，如：COPY one-file.sh /somewhere/ 就比 COPY . /somewhere要好
+* 避免将镜像tag命名为latest
 * 构建镜像时支持用 --network 指定网络[1.13]
 * docker build的--squash参数将Dockerfile中所有的操作，压缩为一层，同时保留了docker history[1.13]
 * docker build的--cache-from参数，利用镜像中的 History 来判断该层是否和之前的镜像一致，从而避免重复构建[1.13]
-* Dockerfile 中的 MAINTAINER 指令已被废弃，如果需要可以用 LABEL maintainer=<...> 代替
-* 避免使用COPY/ADD，如果必须使用，请写明具体的命令，如：COPY one-file.sh /somewhere/ 就比 COPY . /somewhere来得好
-* 确保不太可能更改的行出现在更可能更改的行之前
 
 ### 从空镜像开始的Dockerfile
 
