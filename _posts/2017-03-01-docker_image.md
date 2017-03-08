@@ -46,7 +46,7 @@
 * 建议每个容器仅运行一个服务
 * 慎用来历不明的镜像
 * 不要在镜像中存储任何有价值的数据
-* 不要用root运行进程
+* 不要用root运行进程，使用USER命令设定RUN/CMD/ENTRYPOINT命令运行的用户或UID，可以多次设定
 * 不要依赖容器中的ip
 * 避免直接更新正在运行的容器，如：在容器中运行apt-get
 * 仅运行有授权的镜像
@@ -56,6 +56,7 @@
 * MAINTAINER 指令已被废弃，可以用 LABEL maintainer=<...> 代替
 * 避免使用COPY/ADD，如果必须使用，请写明具体的命令，如：COPY one-file.sh /somewhere/ 就比 COPY . /somewhere要好
 * 避免将镜像tag命名为latest
+* WORKDIR可以设定RUN/CMD/ENTRYPOINT/COPY/ADD运行的目录，可以多次设定
 * 构建镜像时支持用 --network 指定网络[1.13]
 * docker build的--squash参数将Dockerfile中所有的操作，压缩为一层，同时保留了docker history[1.13]
 * docker build的--cache-from参数，利用镜像中的 History 来判断该层是否和之前的镜像一致，从而避免重复构建[1.13]
@@ -73,11 +74,11 @@
 ## 常用命令
 
 ~~~
-docker build -f /path/to/a/Dockerfile .
+    docker build -f /path/to/a/Dockerfile .
 
-docker build -t shykes/myapp:1.0.2 -t shykes/myapp:latest .
+    docker build -t shykes/myapp:1.0.2 -t shykes/myapp:latest .
 
-docker load -i nginxplus.tar
+    docker load -i nginxplus.tar
 ~~~
 
 查看label
@@ -92,16 +93,30 @@ docker load -i nginxplus.tar
     docker history Image | wc -l
 ~~~
 
-## 既有镜像导出
+## 既有镜像导出，导入
+
+~~~
+    docker save -o fedora-latest.tar fedora:latest
+
+    docker load < fedora:latest
+    docker load --input fedora:latest
+~~~
+
+## 既有容器导出
 
 非常不建议将现有运行的容器导出为镜像
 
 ~~~
-  docker export red_panda > latest.tar
-  docker export --output="latest.tar" red_panda
-  
-  docker save -o fedora-latest.tar fedora:latest
+    docker export red_panda > latest.tar
+    docker export --output="latest.tar" red_panda
+
+    cat latest.tar | docker import - red_panda
+    docker import - latest.tar
 ~~~
+
+## docker export 和docker save的不同之处
+
+导出后再导入(exported-imported)的镜像会丢失所有的历史，而保存后再加载（saveed-loaded）的镜像不会丢失历史和层(layer)。
 
 ## 测试
 
@@ -114,6 +129,7 @@ docker load -i nginxplus.tar
 ## 参考
 
 [official-images](https://github.com/docker-library/official-images)
+[docker-cli-list](https://docs.docker.com/engine/reference/commandline/docker/)
 
 ## 其他
 
